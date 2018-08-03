@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "151131533044",
+    "firebase_url": "https://happydo-46236.firebaseio.com",
+    "project_id": "happydo-46236",
+    "storage_bucket": "happydo-46236.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:151131533044:android:0af83955e0455a08",
+        "android_client_info": {
+          "package_name": "org.mobilatorium.happydo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "151131533044-ujlf7281u9u5h87di9h3upgfknht9mvq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFfJN8jT0O6XY2ORIvSgH8UcdNlz8WzBE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
