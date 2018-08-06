@@ -11,7 +11,10 @@
         android:id="@+id/addFeedCatToDoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+<<<<<<< HEAD
         android:layout_centerInParent="true"
+=======
+>>>>>>> db4ac793dfcb0bc215cbaad7e3c365c32b034285
         android:text="Добавить случайную задачу на 31 декабря"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
