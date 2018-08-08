@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             builder.setView(editTextAddNewTask)
 
             builder.setPositiveButton("Добавить") { _, _ ->
-                TaskAdapter(this,tasks).add(Task(editTextAddNewTask.text.toString(), false))
+                TaskAdapter(this, tasks).add(Task(editTextAddNewTask.text.toString(), false))
                 addNewTaskToDate(editTextAddNewTask.text.toString(), getToday())
             }
 

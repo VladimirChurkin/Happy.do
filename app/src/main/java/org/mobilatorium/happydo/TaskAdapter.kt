@@ -14,7 +14,7 @@ import android.widget.CheckBox
 
 
 @SuppressLint("ParcelCreator")
-class TaskAdapter(context: Context, private var tasks:ArrayList<Task>): ArrayAdapter<Task>(context, 0, tasks), Parcelable {
+class TaskAdapter(context: Context, private val tasks:ArrayList<Task>): ArrayAdapter<Task>(context, 0, tasks), Parcelable {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var listItem: View? = convertView
@@ -25,8 +25,6 @@ class TaskAdapter(context: Context, private var tasks:ArrayList<Task>): ArrayAda
 
         val action = listItem!!.findViewById(R.id.action) as CheckBox
         action.text = currentTask.action
-
-
 
         val redactButton = listItem!!.findViewById(R.id.redact_button) as Button
 
