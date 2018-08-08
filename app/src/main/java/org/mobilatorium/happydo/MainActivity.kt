@@ -2,32 +2,55 @@ package org.mobilatorium.happydo
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.addFeedCatToDoButton
-
-
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
-    val randomTasks = arrayListOf("купить кефир", "позвонить Маме", "покормить кота", "заработать $10К")
+    //создаем и инициализируем коллекцию для вывода тасков в лист вью
+    private var tasks = ArrayList<String>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        printTasksFromDateToLogcat("2018-12-31")
+        //получаем наши таски в коллекцию
+        getTasks(getToday())
 
-        addFeedCatToDoButton.setOnClickListener { _ ->
-            addNewTaskToDate(randomTasks.shuffled()[0], "2018-12-31")
+        //создаем адаптер для данных, элемент лист вью - чекбокс
+        val adapter = ArrayAdapter<String>(this, R.layout.list_view_item, tasks)
+        list_view.setAdapter(adapter)
+
+        //собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
+        addTask.setOnClickListener {
+            val builder = AlertDialog.Builder(this@MainActivity)
+            val editText = EditText(this)
+            builder.setTitle("Добавление новой задачи")
+            builder.setView(editText)
+
+            builder.setPositiveButton("Добавить"){dialog, which ->
+                adapter.add(editText.text.toString())
+                addNewTaskToDate(editText.text.toString(), getToday())
+            }
+
+            builder.setNegativeButton("Отмена"){dialog, which ->
+
+            }
+
+            val dialog = builder.create();
+            dialog.show()
         }
-
-        getTasks("2018-12-31")
 
     }
 
@@ -41,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                         Log.w("main_activity", "Listen failed.", e)
                         return@EventListener
                     }
-                    textView.text = "$date \n ${snapshot?.documents?.map { "${it.get("action")} ${it.get("completed")} \n" }}"
+                      textView.text ="$date \n ${snapshot?.documents?.map { "${it.get("action")} ${it.get("completed")} \n" }}"
                 })
     }
 
@@ -65,6 +88,14 @@ class MainActivity : AppCompatActivity() {
         db.collection("tasks").document()
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
-                .addOnFailureListener { e -> Log.w("main_activity", "Error adding new task", e) }
+                .addOnFailureListener { e -> Log.w("main_activity", "Error adding new task", e)
+                }
+    }
+
+    //функция для получения текущей даты(так проще, и видно из всего кода)
+    fun getToday(): String{
+        val sdf = SimpleDateFormat("yyyy-MM-dd")
+        val currentDate = sdf.format(Date())
+        return currentDate
     }
 }
