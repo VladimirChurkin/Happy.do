@@ -17,7 +17,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     // Создаем и инициализируем коллекцию для вывода тасков в лист вью
-    private var tasks = ArrayList<String>()
+    private var tasks = ArrayList<Task>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
     private fun addNewTasksThroughAlertDialog() {
 
         //создаем адаптер для данных, элемент лист вью - чекбокс
-        val adapter = ArrayAdapter<String>(this, R.layout.list_view_item, tasks)
+        val adapter = TaskAdapter(this, tasks)
         list_view_tasks.adapter = adapter
 
         //собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             builder.setView(editText)
 
             builder.setPositiveButton("Добавить") { _, _ ->
-                adapter.add(editText.text.toString())
+                adapter.add(Task(editText.text.toString(), false))
                 addNewTaskToDate(editText.text.toString(), getToday())
             }
 
