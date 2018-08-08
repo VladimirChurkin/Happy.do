@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.ArrayAdapter
 import android.widget.EditText
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,13 +15,13 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    // Создаем и инициализируем коллекцию для вывода тасков в лист вью
-    private var tasks = ArrayList<Task>()
-
+    private val tasks = ArrayList<Task>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        list_view_tasks.adapter = TaskAdapter(this, tasks)
 
         // Получаем наши таски в коллекцию
         getTasks(getToday())
@@ -72,26 +71,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun addNewTasksThroughAlertDialog() {
 
-        //создаем адаптер для данных, элемент лист вью - чекбокс
-        val adapter = TaskAdapter(this, tasks)
-        list_view_tasks.adapter = adapter
-
         //собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
         addTask.setOnClickListener {
             val builder = AlertDialog.Builder(this@MainActivity)
-            val editText = EditText(this)
+            val editTextAddNewTask = EditText(this)
             builder.setTitle("Добавление новой задачи")
-            builder.setView(editText)
+            builder.setView(editTextAddNewTask)
 
             builder.setPositiveButton("Добавить") { _, _ ->
-                adapter.add(Task(editText.text.toString(), false))
-                addNewTaskToDate(editText.text.toString(), getToday())
+                TaskAdapter(this,tasks).add(Task(editTextAddNewTask.text.toString(), false))
+                addNewTaskToDate(editTextAddNewTask.text.toString(), getToday())
             }
 
             builder.setNegativeButton("Отмена") { _, _ -> }
 
-            val dialog = builder.create()
-            dialog.show()
+            builder.create().show()
         }
     }
 

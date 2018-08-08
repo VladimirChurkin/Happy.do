@@ -4,13 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import android.graphics.Movie
 import android.os.Parcel
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.support.annotation.NonNull
-import android.support.annotation.Nullable
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
@@ -24,10 +21,12 @@ class TaskAdapter(context: Context, private var tasks:ArrayList<Task>): ArrayAda
         if (listItem == null)
             listItem = LayoutInflater.from(context).inflate(R.layout.custom_list_view_item, parent, false)
 
-        val currentTask = tasks.get(position)
+        val currentTask = tasks[position]
 
         val action = listItem!!.findViewById(R.id.action) as CheckBox
         action.text = currentTask.action
+
+
 
         val redactButton = listItem!!.findViewById(R.id.redact_button) as Button
 
