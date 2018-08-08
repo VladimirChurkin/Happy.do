@@ -1,4 +1,3 @@
 package org.mobilatorium.happydo
 
-class Task {
-}
+data class Task(var action: String, var completed: Boolean)
