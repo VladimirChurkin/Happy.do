@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Happy.do</string>
+    <string name="addTask">Добавить задачу</string>
 </resources>

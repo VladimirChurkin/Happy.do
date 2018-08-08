@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.EditText
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
@@ -17,7 +16,7 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    //создаем и инициализируем коллекцию для вывода тасков в лист вью
+    // Создаем и инициализируем коллекцию для вывода тасков в лист вью
     private var tasks = ArrayList<String>()
 
 
@@ -25,32 +24,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //получаем наши таски в коллекцию
+        // Получаем наши таски в коллекцию
         getTasks(getToday())
 
-        //создаем адаптер для данных, элемент лист вью - чекбокс
-        val adapter = ArrayAdapter<String>(this, R.layout.list_view_item, tasks)
-        list_view.setAdapter(adapter)
-
-        //собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
-        addTask.setOnClickListener {
-            val builder = AlertDialog.Builder(this@MainActivity)
-            val editText = EditText(this)
-            builder.setTitle("Добавление новой задачи")
-            builder.setView(editText)
-
-            builder.setPositiveButton("Добавить"){dialog, which ->
-                adapter.add(editText.text.toString())
-                addNewTaskToDate(editText.text.toString(), getToday())
-            }
-
-            builder.setNegativeButton("Отмена"){dialog, which ->
-
-            }
-
-            val dialog = builder.create();
-            dialog.show()
-        }
+        addNewTasksThroughAlertDialog()
 
     }
 
@@ -64,23 +41,23 @@ class MainActivity : AppCompatActivity() {
                         Log.w("main_activity", "Listen failed.", e)
                         return@EventListener
                     }
-                      textView.text ="$date \n ${snapshot?.documents?.map { "${it.get("action")} ${it.get("completed")} \n" }}"
+                    textView.text = "$date \n ${snapshot?.documents?.map { "${it.get("action")} ${it.get("completed")} \n" }}"
                 })
     }
 
-    private fun printTasksFromDateToLogcat(date: String) {
-        val db = FirebaseFirestore.getInstance()
-
-        db.collection("tasks")
-                .whereEqualTo("date", date)
-                .addSnapshotListener(EventListener { snapshot, e ->
-                    if (e != null) {
-                        Log.w("main_activity", "Listen failed.", e)
-                        return@EventListener
-                    }
-                    Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
-                })
-    }
+//    private fun printTasksFromDateToLogcat(date: String) {
+//        val db = FirebaseFirestore.getInstance()
+//
+//        db.collection("tasks")
+//                .whereEqualTo("date", date)
+//                .addSnapshotListener(EventListener { snapshot, e ->
+//                    if (e != null) {
+//                        Log.w("main_activity", "Listen failed.", e)
+//                        return@EventListener
+//                    }
+//                    Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
+//                })
+//    }
 
     private fun addNewTaskToDate(task: String, date: String) {
         val db = FirebaseFirestore.getInstance()
@@ -88,14 +65,40 @@ class MainActivity : AppCompatActivity() {
         db.collection("tasks").document()
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
-                .addOnFailureListener { e -> Log.w("main_activity", "Error adding new task", e)
+                .addOnFailureListener { e ->
+                    Log.w("main_activity", "Error adding new task", e)
                 }
     }
 
-    //функция для получения текущей даты(так проще, и видно из всего кода)
-    fun getToday(): String{
+    private fun addNewTasksThroughAlertDialog() {
+
+        //создаем адаптер для данных, элемент лист вью - чекбокс
+        val adapter = ArrayAdapter<String>(this, R.layout.list_view_item, tasks)
+        list_view_tasks.adapter = adapter
+
+        //собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
+        addTask.setOnClickListener {
+            val builder = AlertDialog.Builder(this@MainActivity)
+            val editText = EditText(this)
+            builder.setTitle("Добавление новой задачи")
+            builder.setView(editText)
+
+            builder.setPositiveButton("Добавить") { _, _ ->
+                adapter.add(editText.text.toString())
+                addNewTaskToDate(editText.text.toString(), getToday())
+            }
+
+            builder.setNegativeButton("Отмена") { _, _ -> }
+
+            val dialog = builder.create()
+            dialog.show()
+        }
+    }
+
+    // Функция для получения текущей даты(так проще, и видно из всего кода)
+    @SuppressLint("SimpleDateFormat")
+    private fun getToday(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd")
-        val currentDate = sdf.format(Date())
-        return currentDate
+        return sdf.format(Date())
     }
 }
