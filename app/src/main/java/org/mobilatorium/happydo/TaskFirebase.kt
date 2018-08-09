@@ -1,5 +1,6 @@
 package org.mobilatorium.happydo
 
+<<<<<<< HEAD
 import android.annotation.SuppressLint
 import android.util.Log
 import com.google.firebase.firestore.EventListener
@@ -47,4 +48,7 @@ class TaskFirebase {
                     Log.w("main_activity", "Error adding new task", e)
                 }
     }
+=======
+class TaskFirebase {
+>>>>>>> parent of 2543e2e... putting firebase methods in separated class
 }
