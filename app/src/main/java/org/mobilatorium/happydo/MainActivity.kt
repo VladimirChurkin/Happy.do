@@ -41,7 +41,11 @@ class MainActivity : AppCompatActivity() {
 
             builder.setPositiveButton("Добавить") { _, _ ->
                 TaskAdapter(this,tasks).add(Task(editTextAddNewTask.text.toString(), false))
+<<<<<<< HEAD
                 firebase.addNewTaskToDate(editTextAddNewTask.text.toString(), getToday())
+=======
+                addNewTaskToDate(editTextAddNewTask.text.toString(), getToday())
+>>>>>>> parent of f2d4f13... small change
             }
 
             builder.setNegativeButton("Отмена") { _, _ -> }
