@@ -16,15 +16,8 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private val tasks = ArrayList<Task>()
-<<<<<<< HEAD
-    //вот это вот и есть объект нашего класса с методами Firebase
-<<<<<<< HEAD
-    val firebase = TaskFirebase()
-=======
->>>>>>> parent of 2543e2e... putting firebase methods in separated class
-=======
-    private val firebase = TaskFirebase()
->>>>>>> parent of 9a24764... Try fix textView
+    private val db = FirebaseFirestore.getInstance()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,27 +26,14 @@ class MainActivity : AppCompatActivity() {
         list_view_tasks.adapter = TaskAdapter(this, tasks)
 
         // Получаем наши таски в коллекцию
-<<<<<<< HEAD
-        // Чутка переделал, не хочет из другого левого класса работать с текст вью. Теперь метод getTasks возвращает строку
-        // с тасками
-<<<<<<< HEAD
-        firebase.getTasks(getToday())
-        textView.text = firebase.result
-=======
         getTasks(getToday())
 
->>>>>>> parent of 2543e2e... putting firebase methods in separated class
-=======
-        textView.text=firebase.getTasks(getToday())
-
->>>>>>> parent of 9a24764... Try fix textView
         addNewTasksThroughAlertDialog()
 
     }
 
     @SuppressLint("SetTextI18n")
     private fun getTasks(date: String) {
-        val db = FirebaseFirestore.getInstance()
         db.collection("tasks")
                 .whereEqualTo("date", date)
                 .addSnapshotListener(EventListener { snapshot, e ->
@@ -62,26 +42,12 @@ class MainActivity : AppCompatActivity() {
                         return@EventListener
                     }
                     textView.text = "$date \n ${snapshot?.documents?.map { "${it.get("action")} ${it.get("completed")} \n" }}"
+                    Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
+
                 })
     }
 
-//    private fun printTasksFromDateToLogcat(date: String) {
-//        val db = FirebaseFirestore.getInstance()
-//
-//        db.collection("tasks")
-//                .whereEqualTo("date", date)
-//                .addSnapshotListener(EventListener { snapshot, e ->
-//                    if (e != null) {
-//                        Log.w("main_activity", "Listen failed.", e)
-//                        return@EventListener
-//                    }
-//                    Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
-//                })
-//    }
-
     private fun addNewTaskToDate(task: String, date: String) {
-        val db = FirebaseFirestore.getInstance()
-
         db.collection("tasks").document()
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
@@ -95,27 +61,15 @@ class MainActivity : AppCompatActivity() {
         //собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
         addTask.setOnClickListener {
             val builder = AlertDialog.Builder(this@MainActivity)
-            val editTextAddNewTask = EditText(this)
+            val addNewTask = EditText(this)
             builder.setTitle("Добавление новой задачи")
-            builder.setView(editTextAddNewTask)
-
-            builder.setPositiveButton("Добавить") { _, _ ->
-<<<<<<< HEAD
-                TaskAdapter(this,tasks).add(Task(editTextAddNewTask.text.toString(), false))
-<<<<<<< HEAD
-                firebase.addNewTaskToDate(editTextAddNewTask.text.toString(), getToday())
-=======
-                addNewTaskToDate(editTextAddNewTask.text.toString(), getToday())
->>>>>>> parent of f2d4f13... small change
-=======
-                TaskAdapter(this, tasks).add(Task(editTextAddNewTask.text.toString(), false))
-                addNewTaskToDate(editTextAddNewTask.text.toString(), getToday())
->>>>>>> parent of 2543e2e... putting firebase methods in separated class
-            }
-
-            builder.setNegativeButton("Отмена") { _, _ -> }
-
-            builder.create().show()
+                    .setView(addNewTask)
+                    .setPositiveButton("OK"){_,_->
+                        TaskAdapter(this, tasks).add(Task(addNewTask.text.toString(), false))
+                        addNewTaskToDate(addNewTask.text.toString(), getToday())
+                    }
+                    .setNegativeButton("Отмена"){_,_->}
+                    .create().show()
         }
     }
 
