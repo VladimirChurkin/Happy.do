@@ -4,7 +4,10 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.EditText
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -15,9 +18,13 @@ class MainActivity : AppCompatActivity() {
     private val tasks = ArrayList<Task>()
 <<<<<<< HEAD
     //вот это вот и есть объект нашего класса с методами Firebase
+<<<<<<< HEAD
     val firebase = TaskFirebase()
 =======
 >>>>>>> parent of 2543e2e... putting firebase methods in separated class
+=======
+    private val firebase = TaskFirebase()
+>>>>>>> parent of 9a24764... Try fix textView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,12 +36,17 @@ class MainActivity : AppCompatActivity() {
 <<<<<<< HEAD
         // Чутка переделал, не хочет из другого левого класса работать с текст вью. Теперь метод getTasks возвращает строку
         // с тасками
+<<<<<<< HEAD
         firebase.getTasks(getToday())
         textView.text = firebase.result
 =======
         getTasks(getToday())
 
 >>>>>>> parent of 2543e2e... putting firebase methods in separated class
+=======
+        textView.text=firebase.getTasks(getToday())
+
+>>>>>>> parent of 9a24764... Try fix textView
         addNewTasksThroughAlertDialog()
 
     }
