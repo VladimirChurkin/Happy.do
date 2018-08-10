@@ -29,7 +29,7 @@ class TaskAdapter(context: Context, private var tasks:ArrayList<Task>): ArrayAda
 
 
         // редактируем таски
-        val redactButton = listItem!!.findViewById(R.id.redact_button) as Button
+        val redactButton = listItem.findViewById(R.id.redact_button) as Button
         redactButton.setOnClickListener {
             val builder = AlertDialog.Builder(context)
             val redactTask = EditText(context)
@@ -37,7 +37,7 @@ class TaskAdapter(context: Context, private var tasks:ArrayList<Task>): ArrayAda
             builder.setTitle("Редактирование задачи")
                     .setView(redactTask)
                     .setPositiveButton("OK"){_,_->
-                        tasks.set(position, Task(redactTask.text.toString(), false))
+                        tasks[position] = Task(redactTask.text.toString(), false)
                         this.notifyDataSetChanged()
                     }
                     .setNegativeButton("Отмена"){_,_->}
@@ -45,7 +45,7 @@ class TaskAdapter(context: Context, private var tasks:ArrayList<Task>): ArrayAda
         }
 
         // удаляем таски
-        val deleteButton = listItem!!.findViewById(R.id.delete_button) as TextView
+        val deleteButton = listItem.findViewById(R.id.delete_button) as TextView
         deleteButton.setOnClickListener {
             val builder = AlertDialog.Builder(context)
             builder.setTitle("Удаление задачи")
