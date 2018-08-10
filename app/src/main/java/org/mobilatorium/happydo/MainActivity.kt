@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.ArrayAdapter
 import android.widget.EditText
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,13 +15,15 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    // Создаем и инициализируем коллекцию для вывода тасков в лист вью
-    private var tasks = ArrayList<Task>()
+    private val tasks = ArrayList<Task>()
+    private val db = FirebaseFirestore.getInstance()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        list_view_tasks.adapter = TaskAdapter(this, tasks)
 
         // Получаем наши таски в коллекцию
         getTasks(getToday())
@@ -33,7 +34,6 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun getTasks(date: String) {
-        val db = FirebaseFirestore.getInstance()
         db.collection("tasks")
                 .whereEqualTo("date", date)
                 .addSnapshotListener(EventListener { snapshot, e ->
@@ -42,26 +42,12 @@ class MainActivity : AppCompatActivity() {
                         return@EventListener
                     }
                     textView.text = "$date \n ${snapshot?.documents?.map { "${it.get("action")} ${it.get("completed")} \n" }}"
+                    Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
+
                 })
     }
 
-//    private fun printTasksFromDateToLogcat(date: String) {
-//        val db = FirebaseFirestore.getInstance()
-//
-//        db.collection("tasks")
-//                .whereEqualTo("date", date)
-//                .addSnapshotListener(EventListener { snapshot, e ->
-//                    if (e != null) {
-//                        Log.w("main_activity", "Listen failed.", e)
-//                        return@EventListener
-//                    }
-//                    Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
-//                })
-//    }
-
     private fun addNewTaskToDate(task: String, date: String) {
-        val db = FirebaseFirestore.getInstance()
-
         db.collection("tasks").document()
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
@@ -72,26 +58,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun addNewTasksThroughAlertDialog() {
 
-        //создаем адаптер для данных, элемент лист вью - чекбокс
-        val adapter = TaskAdapter(this, tasks)
-        list_view_tasks.adapter = adapter
-
         //собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
         addTask.setOnClickListener {
             val builder = AlertDialog.Builder(this@MainActivity)
-            val editText = EditText(this)
+            val addNewTask = EditText(this)
             builder.setTitle("Добавление новой задачи")
-            builder.setView(editText)
-
-            builder.setPositiveButton("Добавить") { _, _ ->
-                adapter.add(Task(editText.text.toString(), false))
-                addNewTaskToDate(editText.text.toString(), getToday())
-            }
-
-            builder.setNegativeButton("Отмена") { _, _ -> }
-
-            val dialog = builder.create()
-            dialog.show()
+                    .setView(addNewTask)
+                    .setPositiveButton("OK"){_,_->
+                        TaskAdapter(this, tasks).add(Task(addNewTask.text.toString(), false))
+                        addNewTaskToDate(addNewTask.text.toString(), getToday())
+                    }
+                    .setNegativeButton("Отмена"){_,_->}
+                    .create().show()
         }
     }
 
