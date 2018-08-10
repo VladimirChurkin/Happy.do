@@ -27,6 +27,8 @@ class MainActivity : AppCompatActivity() {
 
         // Получаем наши таски в коллекцию
         getTasks(getToday())
+        TextDate.text = getToday()
+
 
         addNewTasksThroughAlertDialog()
 
