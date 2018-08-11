@@ -1,7 +1,9 @@
 package org.mobilatorium.happydo
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -9,15 +11,19 @@ import android.widget.EditText
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
-import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : AppCompatActivity() {
 
     private val tasks = ArrayList<Task>()
     private val db = FirebaseFirestore.getInstance()
 
+    //сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
+    private var date = LocalDate.now();
+    private var format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +32,13 @@ class MainActivity : AppCompatActivity() {
         list_view_tasks.adapter = TaskAdapter(this, tasks)
 
         // Получаем наши таски в коллекцию
-        getTasks(getToday())
-        TextDate.text = getToday()
-
+        getTasks(date.format(format))
+        TextDate.text = date.format(format)
 
         addNewTasksThroughAlertDialog()
 
+        toNextDay()
+        toLastDay()
     }
 
     @SuppressLint("SetTextI18n")
@@ -68,17 +75,28 @@ class MainActivity : AppCompatActivity() {
                     .setView(addNewTask)
                     .setPositiveButton("OK"){_,_->
                         TaskAdapter(this, tasks).add(Task(addNewTask.text.toString(), false))
-                        addNewTaskToDate(addNewTask.text.toString(), getToday())
+                        addNewTaskToDate(addNewTask.text.toString(), date.format(format))
                     }
                     .setNegativeButton("Отмена"){_,_->}
                     .create().show()
         }
     }
 
-    // Функция для получения текущей даты(так проще, и видно из всего кода)
-    @SuppressLint("SimpleDateFormat")
-    private fun getToday(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd")
-        return sdf.format(Date())
+    private fun toNextDay(){
+        //с помощью кнопки изменяем дату на один день вперед и смотрим таски на эту дату
+        toNextDate.setOnClickListener {
+            date = date.plusDays(1)
+            getTasks(date.format(format))
+            TextDate.text = date.format(format)
+        }
+    }
+
+    private fun toLastDay(){
+        //с помощью кнопки изменяем дату на один день назад и смотрим таски на эту дату
+        toLastDate.setOnClickListener {
+            date = date.minusDays(1)
+            getTasks(date.format(format))
+            TextDate.text = date.format(format)
+        }
     }
 }
