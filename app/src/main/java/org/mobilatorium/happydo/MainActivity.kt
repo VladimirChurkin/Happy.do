@@ -21,11 +21,12 @@ class MainActivity : AppCompatActivity() {
     private val tasks = ArrayList<Task>()
     private val db = FirebaseFirestore.getInstance()
 
-    //сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
-    private var date = LocalDate.now();
+    // Сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
+    private var date = LocalDate.now()
     private var format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -33,70 +34,93 @@ class MainActivity : AppCompatActivity() {
 
         // Получаем наши таски в коллекцию
         getTasks(date.format(format))
-        TextDate.text = date.format(format)
+        text_view_date.text = date.format(format)
 
         addNewTasksThroughAlertDialog()
 
-        toNextDay()
-        toLastDay()
+        changeDay()
+
     }
 
     @SuppressLint("SetTextI18n")
     private fun getTasks(date: String) {
+
         db.collection("tasks")
                 .whereEqualTo("date", date)
                 .addSnapshotListener(EventListener { snapshot, e ->
+
                     if (e != null) {
                         Log.w("main_activity", "Listen failed.", e)
                         return@EventListener
                     }
-                    textView.text = "$date \n ${snapshot?.documents?.map { "${it.get("action")} ${it.get("completed")} \n" }}"
+
+                    if ("${snapshot?.documents?.map { it["action"] } }" != "[]") {
+                        text_view.text = "${snapshot?.documents?.map { "${it["action"]} ${it["completed"]} \n" }}"
+                        text_view.textSize = 15f
+                        text_view.gravity = 2
+                    } else {
+                        text_view.text = "Для добавления заметок нажмите на кнопку \"Добавить заметку\""
+                        text_view.textSize = 30f
+                        text_view.gravity = 1
+                    }
+
                     Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
 
                 })
+
     }
 
     private fun addNewTaskToDate(task: String, date: String) {
+
         db.collection("tasks").document()
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
                 .addOnFailureListener { e ->
                     Log.w("main_activity", "Error adding new task", e)
                 }
+
     }
 
     private fun addNewTasksThroughAlertDialog() {
 
-        //собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
-        addTask.setOnClickListener {
+        // Собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
+        button_add_task.setOnClickListener {
+
             val builder = AlertDialog.Builder(this@MainActivity)
             val addNewTask = EditText(this)
+
             builder.setTitle("Добавление новой задачи")
                     .setView(addNewTask)
-                    .setPositiveButton("OK"){_,_->
+                    .setPositiveButton("OK") { _, _ ->
                         TaskAdapter(this, tasks).add(Task(addNewTask.text.toString(), false))
                         addNewTaskToDate(addNewTask.text.toString(), date.format(format))
                     }
-                    .setNegativeButton("Отмена"){_,_->}
+                    .setNegativeButton("Отмена") { _, _ -> }
                     .create().show()
+
         }
+
     }
 
-    private fun toNextDay(){
-        //с помощью кнопки изменяем дату на один день вперед и смотрим таски на эту дату
-        toNextDate.setOnClickListener {
+    private fun reloadingDate() {
+        getTasks(date.format(format))
+        text_view_date.text = date.format(format)
+    }
+
+    private fun changeDay() {
+
+        // С помощью кнопки изменяем дату на один день вперед и смотрим таски на эту дату
+        button_to_next_date.setOnClickListener {
             date = date.plusDays(1)
-            getTasks(date.format(format))
-            TextDate.text = date.format(format)
+            reloadingDate()
         }
+
+        // С помощью кнопки изменяем дату на один день назад и смотрим таски на эту дату
+        button_to_last_date.setOnClickListener {
+            date = date.minusDays(1)
+            reloadingDate()
+        }
+
     }
 
-    private fun toLastDay(){
-        //с помощью кнопки изменяем дату на один день назад и смотрим таски на эту дату
-        toLastDate.setOnClickListener {
-            date = date.minusDays(1)
-            getTasks(date.format(format))
-            TextDate.text = date.format(format)
-        }
-    }
 }
