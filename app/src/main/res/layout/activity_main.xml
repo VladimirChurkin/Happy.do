@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentStart="true"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/top_panel"
-        android:layout_alignParentStart="true" >
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="16dp">
 
         <Button
             android:id="@+id/button_to_last_date"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_margin="3dp"
-            android:background="@drawable/button_back" />
+            android:background="@drawable/button_back"/>
 
         <TextView
             android:id="@+id/text_view_date"
@@ -42,19 +42,18 @@
 
     </RelativeLayout>
 
-    <TextView
+    <!--TextView
         android:id="@+id/text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/top_panel" />
+        android:layout_below="@+id/top_panel" /-->
 
-    <ListView
-        android:id="@+id/list_view_tasks"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view_tasks"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@id/text_view"
-        android:layout_above="@id/button_add_task" />
+        android:layout_weight="1"/>
 
     <Button
         android:id="@+id/button_add_task"
@@ -64,4 +63,4 @@
         android:layout_alignParentStart="true"
         android:text="@string/addTask" />
 
-</RelativeLayout>
+</LinearLayout>
