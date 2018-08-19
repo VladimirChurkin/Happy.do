@@ -29,41 +29,11 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : AppCompatActivity() {
 
+    private val db = FirebaseFirestore.getInstance()
+
+    // Сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
     private var date = LocalDate.now()
     private var format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-    val db = FirebaseFirestore.getInstance()
-    val query = db.collection("tasks").whereEqualTo("date", date.format(format))
-    val options = FirestoreRecyclerOptions.Builder<Task>()
-            .setQuery(query, Task::class.java)
-            .build()
-    val adapter = object : FirestoreRecyclerAdapter<Task, TaskHolder>(options) {
-        override fun onBindViewHolder(holder: TaskHolder, position: Int, task: Task) {
-            holder.bind(task)
-        }
-
-        override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
-            // Create a new instance of the ViewHolder, in this case we are using a custom
-            // layout called R.layout.message for each item
-            val view = LayoutInflater.from(group.context)
-                    .inflate(R.layout.custom_list_view_item, group, false)
-
-            return TaskHolder(view)
-        }
-
-        override fun onDataChanged() {
-            Log.i("MainActivity", "onDataChanged")
-            // Called each time there is a new query snapshot. You may want to use this method
-            // to hide a loading spinner or check for the "no documents" state and update your UI.
-            // ...
-        }
-
-        override fun onError(e: FirebaseFirestoreException) {
-            Log.w("MainActivity", e)
-        }
-    }
-    // Сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +47,33 @@ class MainActivity : AppCompatActivity() {
         changeDate(date)
     }
 
+//    @SuppressLint("SetTextI18n")
+//    private fun getTasks(date: String) {
+//
+//        db.collection("tasks")
+//                .whereEqualTo("date", date)
+//                .addSnapshotListener(EventListener { snapshot, e ->
+//
+//                    if (e != null) {
+//                        Log.w("main_activity", "Listen failed.", e)
+//                        return@EventListener
+//                    }
+//
+//                    if (snapshot?.documents?.map { it["action"] }?.isEmpty()) {
+//                        text_view.text = "${snapshot?.documents?.map { "${it["action"]} ${it["completed"]} \n" }}"
+//                        text_view.textSize = 15f
+//                        text_view.gravity = 2
+//                    } else {
+//                        text_view.text = "Для добавления заметок нажмите на кнопку \"Добавить заметку\""
+//                        text_view.textSize = 30f
+//                        text_view.gravity = 1
+//                    }
+//
+//                    Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
+//
+//                })
+//
+//    }
 
     private fun setupDateNavigation() {
 
@@ -119,8 +116,37 @@ class MainActivity : AppCompatActivity() {
         changeTasksRecyclerViewForDate(date)
     }
 
-
     private fun changeTasksRecyclerViewForDate(date: LocalDate) {
+        val query = db.collection("tasks").whereEqualTo("date", date.format(format))
+        val options = FirestoreRecyclerOptions.Builder<Task>()
+                .setQuery(query, Task::class.java)
+                .build()
+
+        val adapter = object : FirestoreRecyclerAdapter<Task, TaskHolder>(options) {
+            override fun onBindViewHolder(holder: TaskHolder, position: Int, task: Task) {
+                holder.bind(task)
+            }
+
+            override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
+                // Create a new instance of the ViewHolder, in this case we are using a custom
+                // layout called R.layout.message for each item
+                val view = LayoutInflater.from(group.context)
+                        .inflate(R.layout.custom_list_view_item, group, false)
+
+                return TaskHolder(view)
+            }
+
+            override fun onDataChanged() {
+                Log.i("MainActivity", "onDataChanged")
+                // Called each time there is a new query snapshot. You may want to use this method
+                // to hide a loading spinner or check for the "no documents" state and update your UI.
+                // ...
+            }
+
+            override fun onError(e: FirebaseFirestoreException) {
+                Log.w("MainActivity", e)
+            }
+        }
         adapter.startListening()
         recycler_view_tasks.adapter = adapter
         recycler_view_tasks.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
