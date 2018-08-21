@@ -1,6 +1,5 @@
 package org.mobilatorium.happydo
 
-import android.arch.lifecycle.LifecycleOwner
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
@@ -11,7 +10,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.Toast
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.firestore.FirebaseFirestore
@@ -94,11 +92,10 @@ class MainActivity : AppCompatActivity() {
 
         // Собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
         button_add_task.setOnClickListener {
-
-            val builder = AlertDialog.Builder(this@MainActivity)
             val addNewTask = EditText(this)
 
-            builder.setTitle("Добавление новой задачи")
+            AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Добавление новой задачи")
                     .setView(addNewTask)
                     .setPositiveButton("OK") { _, _ ->
                         //                        TaskAdapter(this, tasks).add(Task(addNewTask.text.toString(), false))
@@ -128,7 +125,7 @@ class MainActivity : AppCompatActivity() {
                 holder.bind(task)
                 //ищем таску по ID документа и удаляем ее
                 holder.deleteButton.setOnClickListener {
-                    val builder = AlertDialog.Builder(this@MainActivity)
+                    AlertDialog.Builder(this@MainActivity)
                             .setTitle("Удаление задачи")
                             .setMessage("Вы действительно хотите удалить задачу?")
                             .setPositiveButton("OK"){_,_ ->
@@ -144,12 +141,11 @@ class MainActivity : AppCompatActivity() {
                 //2. Удаляем таску
                 //3. Создаем новую таску с action из EditText и запомненными date и completed
                 holder.editButton.setOnClickListener {
-                    val builder = AlertDialog.Builder(this@MainActivity)
                     val editTaskAction = EditText(this@MainActivity)
                     editTaskAction.setText(task.action)
-                    val date = task.date
-                    val completed = task.completed
-                    builder.setTitle("Редактирование задачи")
+
+                    AlertDialog.Builder(this@MainActivity)
+                            .setTitle("Редактирование задачи")
                             .setView(editTaskAction)
                             .setPositiveButton("OK"){_,_ ->
                                 db.collection("tasks")
@@ -157,20 +153,27 @@ class MainActivity : AppCompatActivity() {
                                         .delete()
                                 db.collection("tasks")
                                         .document(editTaskAction.text.toString())
-                                        .set(hashMapOf("date" to date, "completed" to completed, "action" to editTaskAction.text.toString()))
+                                        .set(hashMapOf("date" to task.date, "completed" to task.completed, "action" to editTaskAction.text.toString()))
                             }
                             .setNegativeButton("Отмена"){_,_ ->}
                             .create().show()
                 }
-                //следим за состоянием чекбоксов и устанавливаем completed в true если нажать галочку
+                //следим за состоянием чекбоксов
                 holder.action.isChecked = task.completed
+                //смотрим, нажат чекбокс или нет, и меняем его значение с нажатого на ненажатый
+                val changeChecked = when(holder.action.isChecked){
+                    false -> true
+                    true -> false
+                }
+
                 holder.action.setOnClickListener {
                     db.collection("tasks")
-                        .document(holder.action.text.toString())
-                        .delete()
+                            .document(holder.action.text.toString())
+                            .delete()
                     db.collection("tasks")
                             .document(holder.action.text.toString())
-                            .set(hashMapOf("date" to task.date, "completed" to true, "action" to task.action))}
+                            .set(hashMapOf("date" to task.date, "completed" to changeChecked, "action" to task.action))}
+
             }
 
             override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
