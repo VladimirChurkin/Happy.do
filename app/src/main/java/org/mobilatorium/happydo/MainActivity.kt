@@ -139,6 +139,25 @@ class MainActivity : AppCompatActivity() {
                             .setNegativeButton("Отмена"){_,_ ->}
                             .create().show()
                 }
+                holder.editButton.setOnClickListener {
+                    val builder = AlertDialog.Builder(this@MainActivity)
+                    val editTaskAction = EditText(this@MainActivity)
+                    editTaskAction.setText(task.action)
+                    val date = task.date
+                    val completed = task.completed
+                    builder.setTitle("Редактирование задачи")
+                            .setView(editTaskAction)
+                            .setPositiveButton("OK"){_,_ ->
+                                db.collection("tasks")
+                                        .document(holder.action.text.toString())
+                                        .delete()
+                                db.collection("tasks")
+                                        .document(editTaskAction.text.toString())
+                                        .set(hashMapOf("date" to date, "completed" to completed, "action" to editTaskAction.text.toString()))
+                            }
+                            .setNegativeButton("Отмена"){_,_ ->}
+                            .create().show()
+                }
             }
 
             override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
