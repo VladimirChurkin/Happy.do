@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.firestore.FirebaseFirestore
@@ -125,6 +126,19 @@ class MainActivity : AppCompatActivity() {
         val adapter = object : FirestoreRecyclerAdapter<Task, TaskHolder>(options) {
             override fun onBindViewHolder(holder: TaskHolder, position: Int, task: Task) {
                 holder.bind(task)
+                //ищем таску по ID документа и удаляем ее
+                holder.deleteButton.setOnClickListener {
+                    val builder = AlertDialog.Builder(this@MainActivity)
+                            .setTitle("Удаление задачи")
+                            .setMessage("Вы действительно хотите удалить задачу?")
+                            .setPositiveButton("OK"){_,_ ->
+                                db.collection("tasks")
+                                        .document(holder.action.text.toString())
+                                        .delete()
+                            }
+                            .setNegativeButton("Отмена"){_,_ ->}
+                            .create().show()
+                }
             }
 
             override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
@@ -153,8 +167,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addNewTaskToDate(task: String, date: String) {
-
-        db.collection("tasks").document()
+        //добавляем в Firebase таску, при этом документ будет назван по имени таски. В дальнейшем это существенно облегчит нам жизнь
+        //а именно поможет реализовать редактирование и удаление тасков
+        db.collection("tasks").document(task)
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
                 .addOnFailureListener { e ->
