@@ -14,11 +14,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import kotlinx.android.synthetic.main.activity_main.button_add_task
-import kotlinx.android.synthetic.main.activity_main.button_to_last_date
-import kotlinx.android.synthetic.main.activity_main.button_to_next_date
-import kotlinx.android.synthetic.main.activity_main.recycler_view_tasks
-import kotlinx.android.synthetic.main.activity_main.text_view_date
+import kotlinx.android.synthetic.main.activity_main.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -187,9 +183,10 @@ class MainActivity : AppCompatActivity() {
 
             override fun onDataChanged() {
                 Log.i("MainActivity", "onDataChanged")
-                // Called each time there is a new query snapshot. You may want to use this method
-                // to hide a loading spinner or check for the "no documents" state and update your UI.
-                // ...
+                if(this.itemCount == 0){
+                    text_view.text = "Нажмите кнопку \"Добавить задачу\", чтобы создать заметку"
+                }
+                else text_view.text = ""
             }
 
             override fun onError(e: FirebaseFirestoreException) {
@@ -197,6 +194,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         adapter.startListening()
+
         recycler_view_tasks.adapter = adapter
         recycler_view_tasks.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
     }
