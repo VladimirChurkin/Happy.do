@@ -1,6 +1,5 @@
 package org.mobilatorium.happydo
 
-import android.arch.lifecycle.LifecycleOwner
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
@@ -15,11 +14,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import kotlinx.android.synthetic.main.activity_main.button_add_task
-import kotlinx.android.synthetic.main.activity_main.button_to_last_date
-import kotlinx.android.synthetic.main.activity_main.button_to_next_date
-import kotlinx.android.synthetic.main.activity_main.recycler_view_tasks
-import kotlinx.android.synthetic.main.activity_main.text_view_date
+import kotlinx.android.synthetic.main.activity_main.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -93,11 +88,10 @@ class MainActivity : AppCompatActivity() {
 
         // Собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
         button_add_task.setOnClickListener {
-
-            val builder = AlertDialog.Builder(this@MainActivity)
             val addNewTask = EditText(this)
 
-            builder.setTitle("Добавление новой задачи")
+            AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Добавление новой задачи")
                     .setView(addNewTask)
                     .setPositiveButton("OK") { _, _ ->
                         //                        TaskAdapter(this, tasks).add(Task(addNewTask.text.toString(), false))
@@ -125,6 +119,57 @@ class MainActivity : AppCompatActivity() {
         val adapter = object : FirestoreRecyclerAdapter<Task, TaskHolder>(options) {
             override fun onBindViewHolder(holder: TaskHolder, position: Int, task: Task) {
                 holder.bind(task)
+                //ищем таску по ID документа и удаляем ее
+                holder.deleteButton.setOnClickListener {
+                    AlertDialog.Builder(this@MainActivity)
+                            .setTitle("Удаление задачи")
+                            .setMessage("Вы действительно хотите удалить задачу?")
+                            .setPositiveButton("OK"){_,_ ->
+                                db.collection("tasks")
+                                        .document(holder.action.text.toString())
+                                        .delete()
+                            }
+                            .setNegativeButton("Отмена"){_,_ ->}
+                            .create().show()
+                }
+                //редактируем таску:
+                //1. Запоминаем date и completed у таски
+                //2. Удаляем таску
+                //3. Создаем новую таску с action из EditText и запомненными date и completed
+                holder.editButton.setOnClickListener {
+                    val editTaskAction = EditText(this@MainActivity)
+                    editTaskAction.setText(task.action)
+
+                    AlertDialog.Builder(this@MainActivity)
+                            .setTitle("Редактирование задачи")
+                            .setView(editTaskAction)
+                            .setPositiveButton("OK"){_,_ ->
+                                db.collection("tasks")
+                                        .document(holder.action.text.toString())
+                                        .delete()
+                                db.collection("tasks")
+                                        .document(editTaskAction.text.toString())
+                                        .set(hashMapOf("date" to task.date, "completed" to task.completed, "action" to editTaskAction.text.toString()))
+                            }
+                            .setNegativeButton("Отмена"){_,_ ->}
+                            .create().show()
+                }
+                //следим за состоянием чекбоксов
+                holder.action.isChecked = task.completed
+                //смотрим, нажат чекбокс или нет, и меняем его значение с нажатого на ненажатый
+                val changeChecked = when(holder.action.isChecked){
+                    false -> true
+                    true -> false
+                }
+
+                holder.action.setOnClickListener {
+                    db.collection("tasks")
+                            .document(holder.action.text.toString())
+                            .delete()
+                    db.collection("tasks")
+                            .document(holder.action.text.toString())
+                            .set(hashMapOf("date" to task.date, "completed" to changeChecked, "action" to task.action))}
+
             }
 
             override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
@@ -138,9 +183,10 @@ class MainActivity : AppCompatActivity() {
 
             override fun onDataChanged() {
                 Log.i("MainActivity", "onDataChanged")
-                // Called each time there is a new query snapshot. You may want to use this method
-                // to hide a loading spinner or check for the "no documents" state and update your UI.
-                // ...
+                if(this.itemCount == 0){
+                    text_view.text = "Нажмите кнопку \"Добавить задачу\", чтобы создать заметку"
+                }
+                else text_view.text = ""
             }
 
             override fun onError(e: FirebaseFirestoreException) {
@@ -148,13 +194,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         adapter.startListening()
+
         recycler_view_tasks.adapter = adapter
         recycler_view_tasks.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
     }
 
     private fun addNewTaskToDate(task: String, date: String) {
-
-        db.collection("tasks").document()
+        //добавляем в Firebase таску, при этом документ будет назван по имени таски. В дальнейшем это существенно облегчит нам жизнь
+        //а именно поможет реализовать редактирование и удаление тасков
+        db.collection("tasks").document(task)
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
                 .addOnFailureListener { e ->
