@@ -139,6 +139,10 @@ class MainActivity : AppCompatActivity() {
                             .setNegativeButton("Отмена"){_,_ ->}
                             .create().show()
                 }
+                //редактируем таску:
+                //1. Запоминаем date и completed у таски
+                //2. Удаляем таску
+                //3. Создаем новую таску с action из EditText и запомненными date и completed
                 holder.editButton.setOnClickListener {
                     val builder = AlertDialog.Builder(this@MainActivity)
                     val editTaskAction = EditText(this@MainActivity)
@@ -158,6 +162,15 @@ class MainActivity : AppCompatActivity() {
                             .setNegativeButton("Отмена"){_,_ ->}
                             .create().show()
                 }
+                //следим за состоянием чекбоксов и устанавливаем completed в true если нажать галочку
+                holder.action.isChecked = task.completed
+                holder.action.setOnClickListener {
+                    db.collection("tasks")
+                        .document(holder.action.text.toString())
+                        .delete()
+                    db.collection("tasks")
+                            .document(holder.action.text.toString())
+                            .set(hashMapOf("date" to task.date, "completed" to true, "action" to task.action))}
             }
 
             override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
