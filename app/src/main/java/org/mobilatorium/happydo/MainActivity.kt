@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.android.synthetic.main.activity_main.*
@@ -87,45 +88,26 @@ class MainActivity : AppCompatActivity() {
         val adapter = object : FirestoreRecyclerAdapter<Task, TaskHolder>(options) {
             override fun onBindViewHolder(holder: TaskHolder, position: Int, task: Task) {
                 holder.bind(task)
+
+                task.id = snapshots.getSnapshot(position).id
+                val docRef = db.collection("tasks").document(task.id)
                 //удаляем таску
                 holder.deleteButton.setOnClickListener {
-                    AlertDialog.Builder(this@MainActivity)
-                            .setTitle("Удаление задачи")
-                            .setMessage("Вы действительно хотите удалить задачу?")
-                            .setPositiveButton("OK"){_,_ ->
-                                db.collection("tasks")
-                                        .document(holder.action.text.toString())
-                                        .delete()
-                            }
-                            .setNegativeButton("Отмена"){_,_ ->}
-                            .create().show()
+                    removeTask(docRef)
                 }
                 //редактируем таску
                 holder.editButton.setOnClickListener {
-                    val editTaskAction = EditText(this@MainActivity)
-                    editTaskAction.setText(task.action)
-
-                    AlertDialog.Builder(this@MainActivity)
-                            .setTitle("Редактирование задачи")
-                            .setView(editTaskAction)
-                            .setPositiveButton("OK"){_,_ ->
-                                db.collection("tasks")
-                                        .document(holder.action.text.toString())
-                                        .update("action", editTaskAction.text.toString())
-                            }
-                            .setNegativeButton("Отмена"){_,_ ->}
-                            .create().show()
+                   editTask(docRef, task.action)
                 }
                 //следим за состоянием чекбоксов
                 holder.action.isChecked = task.completed
-                //смотрим, нажат чекбокс или нет, и меняем его значение с нажатого на ненажатый
-
                 holder.action.setOnClickListener {
-                    val checkedChange = !task.completed
-                    db.collection("tasks")
-                            .document(holder.action.text.toString())
-                            .update("completed", checkedChange)
+                    setChangeChecked(docRef, !task.completed)
                 }
+            }
+
+            private fun setChangeChecked(docRef: DocumentReference, b: Boolean) {
+                docRef.update("completed", b)
             }
 
             override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
@@ -148,6 +130,31 @@ class MainActivity : AppCompatActivity() {
             override fun onError(e: FirebaseFirestoreException) {
                 Log.w("MainActivity", e)
             }
+
+            private fun removeTask(docRef: DocumentReference) {
+                AlertDialog.Builder(this@MainActivity)
+                        .setTitle("Удаление задачи")
+                        .setMessage("Вы действительно хотите удалить задачу?")
+                        .setPositiveButton("OK"){_,_ ->
+                            docRef.delete()
+                        }
+                        .setNegativeButton("Отмена"){_,_ ->}
+                        .create().show()
+            }
+
+            private fun editTask(docRef: DocumentReference, name: String) {
+                val editTaskAction = EditText(this@MainActivity)
+                editTaskAction.setText(name)
+
+                AlertDialog.Builder(this@MainActivity)
+                        .setTitle("Редактирование задачи")
+                        .setView(editTaskAction)
+                        .setPositiveButton("OK"){_,_ ->
+                            docRef.update("action", editTaskAction.text.toString())
+                        }
+                        .setNegativeButton("Отмена"){_,_ ->}
+                        .create().show()
+            }
         }
         adapter.startListening()
 
@@ -157,7 +164,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addNewTaskToDate(task: String, date: String) {
         //добавляем в Firebase таску. ID документа - имя таски
-        db.collection("tasks").document(task)
+        db.collection("tasks").document()
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
                 .addOnFailureListener { e ->
