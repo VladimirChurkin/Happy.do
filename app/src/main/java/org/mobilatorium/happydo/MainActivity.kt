@@ -18,9 +18,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
-
-
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : AppCompatActivity() {
 
@@ -41,34 +38,6 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         changeDate(date)
     }
-
-//    @SuppressLint("SetTextI18n")
-//    private fun getTasks(date: String) {
-//
-//        db.collection("tasks")
-//                .whereEqualTo("date", date)
-//                .addSnapshotListener(EventListener { snapshot, e ->
-//
-//                    if (e != null) {
-//                        Log.w("main_activity", "Listen failed.", e)
-//                        return@EventListener
-//                    }
-//
-//                    if (snapshot?.documents?.map { it["action"] }?.isEmpty()) {
-//                        text_view.text = "${snapshot?.documents?.map { "${it["action"]} ${it["completed"]} \n" }}"
-//                        text_view.textSize = 15f
-//                        text_view.gravity = 2
-//                    } else {
-//                        text_view.text = "Для добавления заметок нажмите на кнопку \"Добавить заметку\""
-//                        text_view.textSize = 30f
-//                        text_view.gravity = 1
-//                    }
-//
-//                    Log.d("main_activity", "tasks for $date: ${snapshot?.documents?.map { it.data }}")
-//
-//                })
-//
-//    }
 
     private fun setupDateNavigation() {
 
@@ -94,7 +63,6 @@ class MainActivity : AppCompatActivity() {
                     .setTitle("Добавление новой задачи")
                     .setView(addNewTask)
                     .setPositiveButton("OK") { _, _ ->
-                        //                        TaskAdapter(this, tasks).add(Task(addNewTask.text.toString(), false))
                         addNewTaskToDate(addNewTask.text.toString(), date.format(format))
                     }
                     .setNegativeButton("Отмена") { _, _ -> }
@@ -119,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         val adapter = object : FirestoreRecyclerAdapter<Task, TaskHolder>(options) {
             override fun onBindViewHolder(holder: TaskHolder, position: Int, task: Task) {
                 holder.bind(task)
-                //ищем таску по ID документа и удаляем ее
+                //удаляем таску
                 holder.deleteButton.setOnClickListener {
                     AlertDialog.Builder(this@MainActivity)
                             .setTitle("Удаление задачи")
@@ -132,10 +100,7 @@ class MainActivity : AppCompatActivity() {
                             .setNegativeButton("Отмена"){_,_ ->}
                             .create().show()
                 }
-                //редактируем таску:
-                //1. Запоминаем date и completed у таски
-                //2. Удаляем таску
-                //3. Создаем новую таску с action из EditText и запомненными date и completed
+                //редактируем таску
                 holder.editButton.setOnClickListener {
                     val editTaskAction = EditText(this@MainActivity)
                     editTaskAction.setText(task.action)
@@ -146,10 +111,7 @@ class MainActivity : AppCompatActivity() {
                             .setPositiveButton("OK"){_,_ ->
                                 db.collection("tasks")
                                         .document(holder.action.text.toString())
-                                        .delete()
-                                db.collection("tasks")
-                                        .document(editTaskAction.text.toString())
-                                        .set(hashMapOf("date" to task.date, "completed" to task.completed, "action" to editTaskAction.text.toString()))
+                                        .update("action", editTaskAction.text.toString())
                             }
                             .setNegativeButton("Отмена"){_,_ ->}
                             .create().show()
@@ -157,19 +119,12 @@ class MainActivity : AppCompatActivity() {
                 //следим за состоянием чекбоксов
                 holder.action.isChecked = task.completed
                 //смотрим, нажат чекбокс или нет, и меняем его значение с нажатого на ненажатый
-                val changeChecked = when(holder.action.isChecked){
-                    false -> true
-                    true -> false
-                }
 
                 holder.action.setOnClickListener {
                     db.collection("tasks")
                             .document(holder.action.text.toString())
-                            .delete()
-                    db.collection("tasks")
-                            .document(holder.action.text.toString())
-                            .set(hashMapOf("date" to task.date, "completed" to changeChecked, "action" to task.action))}
-
+                            .update("completed", !holder.action.isChecked)
+                }
             }
 
             override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
@@ -200,8 +155,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addNewTaskToDate(task: String, date: String) {
-        //добавляем в Firebase таску, при этом документ будет назван по имени таски. В дальнейшем это существенно облегчит нам жизнь
-        //а именно поможет реализовать редактирование и удаление тасков
+        //добавляем в Firebase таску. ID документа - имя таски
         db.collection("tasks").document(task)
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
@@ -210,6 +164,4 @@ class MainActivity : AppCompatActivity() {
                 }
 
     }
-
-
 }
