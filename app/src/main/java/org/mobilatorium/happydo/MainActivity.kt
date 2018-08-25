@@ -87,6 +87,8 @@ class MainActivity : AppCompatActivity() {
         val adapter = object : FirestoreRecyclerAdapter<Task, TaskHolder>(options) {
             override fun onBindViewHolder(holder: TaskHolder, position: Int, task: Task) {
                 holder.bind(task)
+
+                task.id = snapshots.getSnapshot(position).id
                 //удаляем таску
                 holder.deleteButton.setOnClickListener {
                     AlertDialog.Builder(this@MainActivity)
@@ -94,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                             .setMessage("Вы действительно хотите удалить задачу?")
                             .setPositiveButton("OK"){_,_ ->
                                 db.collection("tasks")
-                                        .document(holder.action.text.toString())
+                                        .document(task.id)
                                         .delete()
                             }
                             .setNegativeButton("Отмена"){_,_ ->}
@@ -110,7 +112,7 @@ class MainActivity : AppCompatActivity() {
                             .setView(editTaskAction)
                             .setPositiveButton("OK"){_,_ ->
                                 db.collection("tasks")
-                                        .document(holder.action.text.toString())
+                                        .document(task.id)
                                         .update("action", editTaskAction.text.toString())
                             }
                             .setNegativeButton("Отмена"){_,_ ->}
@@ -123,7 +125,7 @@ class MainActivity : AppCompatActivity() {
                 holder.action.setOnClickListener {
                     val checkedChange = !task.completed
                     db.collection("tasks")
-                            .document(holder.action.text.toString())
+                            .document(task.id)
                             .update("completed", checkedChange)
                 }
             }
@@ -157,7 +159,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addNewTaskToDate(task: String, date: String) {
         //добавляем в Firebase таску. ID документа - имя таски
-        db.collection("tasks").document(task)
+        db.collection("tasks").document()
                 .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
                 .addOnFailureListener { e ->
