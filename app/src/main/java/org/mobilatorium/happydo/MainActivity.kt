@@ -89,15 +89,14 @@ class MainActivity : AppCompatActivity() {
                 holder.bind(task)
 
                 task.id = snapshots.getSnapshot(position).id
+                val docRef = db.collection("tasks").document(task.id)
                 //удаляем таску
                 holder.deleteButton.setOnClickListener {
                     AlertDialog.Builder(this@MainActivity)
                             .setTitle("Удаление задачи")
                             .setMessage("Вы действительно хотите удалить задачу?")
                             .setPositiveButton("OK"){_,_ ->
-                                db.collection("tasks")
-                                        .document(task.id)
-                                        .delete()
+                                docRef.delete()
                             }
                             .setNegativeButton("Отмена"){_,_ ->}
                             .create().show()
@@ -111,9 +110,7 @@ class MainActivity : AppCompatActivity() {
                             .setTitle("Редактирование задачи")
                             .setView(editTaskAction)
                             .setPositiveButton("OK"){_,_ ->
-                                db.collection("tasks")
-                                        .document(task.id)
-                                        .update("action", editTaskAction.text.toString())
+                                docRef.update("action", editTaskAction.text.toString())
                             }
                             .setNegativeButton("Отмена"){_,_ ->}
                             .create().show()
@@ -124,9 +121,7 @@ class MainActivity : AppCompatActivity() {
 
                 holder.action.setOnClickListener {
                     val checkedChange = !task.completed
-                    db.collection("tasks")
-                            .document(task.id)
-                            .update("completed", checkedChange)
+                    docRef.update("completed", checkedChange)
                 }
             }
 
