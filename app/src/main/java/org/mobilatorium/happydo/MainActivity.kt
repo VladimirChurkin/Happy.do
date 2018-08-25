@@ -121,9 +121,10 @@ class MainActivity : AppCompatActivity() {
                 //смотрим, нажат чекбокс или нет, и меняем его значение с нажатого на ненажатый
 
                 holder.action.setOnClickListener {
+                    val checkedChange = !task.completed
                     db.collection("tasks")
                             .document(holder.action.text.toString())
-                            .update("completed", !holder.action.isChecked)
+                            .update("completed", checkedChange)
                 }
             }
 
