@@ -52,6 +52,15 @@ class MainActivity : AppCompatActivity() {
             changeDate(date.minusDays(1))
         }
 
+        activity_main.setOnTouchListener(object: OnSwipeTouchListener(this){
+            override fun onSwipeLeft() {
+                changeDate(date.plusDays(1))
+            }
+
+            override fun onSwipeRight() {
+                changeDate(date.minusDays(1))
+            }
+        })
     }
 
     private fun setupAddNewTaskButton() {
