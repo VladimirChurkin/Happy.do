@@ -102,8 +102,8 @@ class MainActivity : AppCompatActivity() {
                    editTask(docRef, task.action)
                 }
                 //следим за состоянием чекбоксов
-                holder.action.isChecked = task.completed
-                holder.action.setOnClickListener {
+                holder.checkAction.isChecked = task.completed
+                holder.checkAction.setOnClickListener {
                     setChangeChecked(docRef, !task.completed)
                 }
             }
@@ -159,9 +159,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             private fun setChangeChecked(docRef: DocumentReference, b: Boolean) {
-                onPause()
                 docRef.update("completed", b)
-                onStart()
             }
         }
         adapter.startListening()
