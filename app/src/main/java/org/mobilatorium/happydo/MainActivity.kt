@@ -65,9 +65,10 @@ class MainActivity : AppCompatActivity() {
                     .setTitle("Добавление новой задачи")
                     .setView(addNewTask)
                     .setPositiveButton("OK") { _, _ ->
-                        onPause()
+                        it.isEnabled = false
                         addNewTaskToDate(addNewTask.text.toString().trim(), date.format(format))
                         onStart()
+                        it.isEnabled = true
                     }
                     .setNegativeButton("Отмена") { _, _ -> }
                     .create().show()
@@ -134,9 +135,7 @@ class MainActivity : AppCompatActivity() {
                         .setTitle("Удаление задачи")
                         .setMessage("Вы действительно хотите удалить задачу?")
                         .setPositiveButton("OK"){_,_ ->
-                            onPause()
                             docRef.delete()
-                            onStart()
                         }
                         .setNegativeButton("Отмена"){_,_ ->}
                         .create().show()
@@ -150,7 +149,6 @@ class MainActivity : AppCompatActivity() {
                         .setTitle("Редактирование задачи")
                         .setView(editTaskAction)
                         .setPositiveButton("OK"){_,_ ->
-                            onPause()
                             docRef.update("action", editTaskAction.text.toString().trim())
                             onStart()
                         }
