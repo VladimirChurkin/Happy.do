@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
@@ -64,11 +65,12 @@ class MainActivity : AppCompatActivity() {
                     .setTitle("Добавление новой задачи")
                     .setView(addNewTask)
                     .setPositiveButton("OK") { _, _ ->
-                        addNewTaskToDate(addNewTask.text.toString(), date.format(format))
+                        onPause()
+                        addNewTaskToDate(addNewTask.text.toString().trim(), date.format(format))
+                        onStart()
                     }
                     .setNegativeButton("Отмена") { _, _ -> }
                     .create().show()
-
         }
 
     }
@@ -106,10 +108,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            private fun setChangeChecked(docRef: DocumentReference, b: Boolean) {
-                docRef.update("completed", b)
-            }
-
             override fun onCreateViewHolder(group: ViewGroup, i: Int): TaskHolder {
                 // Create a new instance of the ViewHolder, in this case we are using a custom
                 // layout called R.layout.message for each item
@@ -136,7 +134,9 @@ class MainActivity : AppCompatActivity() {
                         .setTitle("Удаление задачи")
                         .setMessage("Вы действительно хотите удалить задачу?")
                         .setPositiveButton("OK"){_,_ ->
+                            onPause()
                             docRef.delete()
+                            onStart()
                         }
                         .setNegativeButton("Отмена"){_,_ ->}
                         .create().show()
@@ -150,10 +150,18 @@ class MainActivity : AppCompatActivity() {
                         .setTitle("Редактирование задачи")
                         .setView(editTaskAction)
                         .setPositiveButton("OK"){_,_ ->
-                            docRef.update("action", editTaskAction.text.toString())
+                            onPause()
+                            docRef.update("action", editTaskAction.text.toString().trim())
+                            onStart()
                         }
                         .setNegativeButton("Отмена"){_,_ ->}
                         .create().show()
+            }
+
+            private fun setChangeChecked(docRef: DocumentReference, b: Boolean) {
+                onPause()
+                docRef.update("completed", b)
+                onStart()
             }
         }
         adapter.startListening()
