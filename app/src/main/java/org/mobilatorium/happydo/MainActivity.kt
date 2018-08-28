@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                     .setTitle("Добавление новой задачи")
                     .setView(addNewTask)
                     .setPositiveButton("OK") { _, _ ->
-                        addNewTaskToDate(addNewTask.text.toString(), date.format(format))
+                        addNewTaskToDate(addNewTask.text.toString().trim(), date.format(format))
                     }
                     .setNegativeButton("Отмена") { _, _ -> }
                     .create().show()
@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity() {
                         .setTitle("Редактирование задачи")
                         .setView(editTaskAction)
                         .setPositiveButton("OK"){_,_ ->
-                            docRef.update("action", editTaskAction.text.toString())
+                            docRef.update("action", editTaskAction.text.toString().trim())
                         }
                         .setNegativeButton("Отмена"){_,_ ->}
                         .create().show()
