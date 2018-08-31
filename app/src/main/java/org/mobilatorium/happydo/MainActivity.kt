@@ -1,8 +1,6 @@
 package org.mobilatorium.happydo
 
-import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -16,23 +14,25 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.android.synthetic.main.activity_main.*
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.*
 
-@RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
 
     // Сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
-    private var date = LocalDate.now()
-    private var format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private var date = Calendar.getInstance()
+    private var format = SimpleDateFormat("yyyy-MM-dd")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupDateNavigation()
         setupAddNewTaskButton()
+
+        // пишу авторизацию пока здесь, потому что пока только так умею
+        
     }
 
     override fun onStart() {
@@ -44,21 +44,25 @@ class MainActivity : AppCompatActivity() {
 
         // С помощью кнопки изменяем дату на один день вперед и смотрим таски на эту дату
         button_to_next_date.setOnClickListener {
-            changeDate(date.plusDays(1))
+            date.add(Calendar.DATE, +1)
+            changeDate(date)
         }
 
         // С помощью кнопки изменяем дату на один день назад и смотрим таски на эту дату
         button_to_last_date.setOnClickListener {
-            changeDate(date.minusDays(1))
+            date.add(Calendar.DATE, -1)
+            changeDate(date)
         }
 
         activity_main.setOnTouchListener(object: OnSwipeTouchListener(this){
             override fun onSwipeLeft() {
-                changeDate(date.plusDays(1))
+                date.add(Calendar.DATE, +1)
+                changeDate(date)
             }
 
             override fun onSwipeRight() {
-                changeDate(date.minusDays(1))
+                date.add(Calendar.DATE, -1)
+                changeDate(date)
             }
         })
     }
@@ -73,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                     .setTitle("Добавление новой задачи")
                     .setView(addNewTask)
                     .setPositiveButton("OK") { _, _ ->
-                        addNewTaskToDate(addNewTask.text.toString().trim(), date.format(format))
+                        addNewTaskToDate(addNewTask.text.toString().trim(), format.format(date.time))
                     }
                     .setNegativeButton("Отмена") { _, _ -> }
                     .create().show()
@@ -82,14 +86,14 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun changeDate(newDate: LocalDate) {
+    private fun changeDate(newDate: Calendar) {
         date = newDate
-        text_view_date.text = date.format(format)
+        text_view_date.text = format.format(date.time)
         changeTasksRecyclerViewForDate(date)
     }
 
-    private fun changeTasksRecyclerViewForDate(date: LocalDate) {
-        val query = db.collection("tasks").whereEqualTo("date", date.format(format))
+    private fun changeTasksRecyclerViewForDate(date: Calendar) {
+        val query = db.collection("tasks").whereEqualTo("date", format.format(date.time))
         val options = FirestoreRecyclerOptions.Builder<Task>()
                 .setQuery(query, Task::class.java)
                 .build()
