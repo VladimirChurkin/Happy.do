@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -20,7 +21,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
-
+    private val user = FirebaseAuth.getInstance().currentUser
     // Сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
     private var date = Calendar.getInstance()
     private var format = SimpleDateFormat("yyyy-MM-dd")
@@ -93,7 +94,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun changeTasksRecyclerViewForDate(date: Calendar) {
-        val query = db.collection("tasks").whereEqualTo("date", format.format(date.time))
+        val query = db.collection("tasks").whereEqualTo("date", format.format(date.time)).whereEqualTo("id", user?.uid!!)
         val options = FirestoreRecyclerOptions.Builder<Task>()
                 .setQuery(query, Task::class.java)
                 .build()
@@ -102,8 +103,8 @@ class MainActivity : AppCompatActivity() {
             override fun onBindViewHolder(holder: TaskHolder, position: Int, task: Task) {
                 holder.bind(task)
 
-                task.id = snapshots.getSnapshot(position).id
-                val docRef = db.collection("tasks").document(task.id)
+                task.id = user?.uid!!
+                val docRef = db.collection("tasks").document(snapshots.getSnapshot(position).id)
                 //удаляем таску
                 holder.deleteButton.setOnClickListener {
                     removeTask(docRef)
@@ -114,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 //следим за состоянием чекбоксов
                 holder.checkAction.isChecked = task.completed
-                holder.action.setOnClickListener {
+                holder.checkAction.setOnClickListener {
                     setChangeChecked(docRef, !task.completed)
                 }
             }
@@ -178,7 +179,7 @@ class MainActivity : AppCompatActivity() {
     private fun addNewTaskToDate(task: String, date: String) {
         //добавляем в Firebase таску. ID документа - имя таски
         db.collection("tasks").document()
-                .set(hashMapOf("date" to date, "completed" to false, "action" to task).toMap())
+                .set(hashMapOf("date" to date, "completed" to false, "action" to task, "id" to user?.uid!!).toMap())
                 .addOnSuccessListener { Log.d("main_activity", "successfully added!") }
                 .addOnFailureListener { e ->
                     Log.w("main_activity", "Error adding new task", e)
