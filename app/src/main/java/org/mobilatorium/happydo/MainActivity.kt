@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         text_view_date.text = format.format(date.time)
         changeTasksRecyclerViewForDate(date)
     }
-
+    //make query by date and uid
     private fun changeTasksRecyclerViewForDate(date: Calendar) {
         val query = db.collection("tasks").whereEqualTo("date", format.format(date.time)).whereEqualTo("id", user?.uid!!)
         val options = FirestoreRecyclerOptions.Builder<Task>()
