@@ -25,9 +25,7 @@ class StartActivity : AppCompatActivity() {
         //логинимся
         button_login.setOnClickListener {
             val providers = Arrays.asList(
-                    AuthUI.IdpConfig.EmailBuilder().build(),
-                    AuthUI.IdpConfig.PhoneBuilder().build(),
-                    AuthUI.IdpConfig.GoogleBuilder().build())
+                    AuthUI.IdpConfig.EmailBuilder().build())
 
             startActivityForResult(
                     AuthUI.getInstance()
@@ -36,10 +34,6 @@ class StartActivity : AppCompatActivity() {
                             .build(),
                     RC_SIGN_IN)        }
 
-        //переходим на сайт с инфой
-        button_info.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://happy.do")))
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
