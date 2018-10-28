@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     // Сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
     private var date = Calendar.getInstance()
-    private var format = SimpleDateFormat("yyyy-MM-dd")
+    private var format = SimpleDateFormat("yyyy-MM-dd \n EEEE")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
