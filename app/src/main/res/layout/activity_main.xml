@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:textSize="30sp"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:layout_centerInParent="true"
             tools:ignore="RelativeOverlap" />
