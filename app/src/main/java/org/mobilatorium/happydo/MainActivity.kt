@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 //следим за состоянием чекбоксов
                 holder.checkAction.isChecked = task.completed
-                holder.action.setOnClickListener {
+                holder.checkAction.setOnClickListener {
                     setChangeChecked(docRef, !task.completed)
                 }
             }
