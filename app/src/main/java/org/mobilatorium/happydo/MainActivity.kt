@@ -6,8 +6,10 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -25,16 +27,13 @@ class MainActivity : AppCompatActivity() {
 
     // Сначала присваеваем текущую дату, а затем как то работаем с ней(увеличиваем/уменьшаем)
     private var date = Calendar.getInstance()
-    private var format = SimpleDateFormat("yyyy-MM-dd \n EEEE")
+    private var format = SimpleDateFormat("dd.MM.yyyy \n EEEE")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupDateNavigation()
         setupAddNewTaskButton()
-
-        // пишу авторизацию пока здесь, потому что пока только так умею
-        
     }
 
     override fun onStart() {
@@ -56,6 +55,7 @@ class MainActivity : AppCompatActivity() {
             changeDate(date)
         }
 
+        //делаем переключение даты свайпом
         activity_main.setOnTouchListener(object: OnSwipeTouchListener(this){
             override fun onSwipeLeft() {
                 date.add(Calendar.DATE, +1)
@@ -67,11 +67,17 @@ class MainActivity : AppCompatActivity() {
                 changeDate(date)
             }
         })
+
+        //переключение даты календариком
+        text_view_date.setOnClickListener {
+            calendarView.visibility = View.INVISIBLE
+            Toast.makeText(this, "I was tapped", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun setupAddNewTaskButton() {
 
-        // Собсна, создаем диалоговое окно и добавляем таски Лехиным методом)))
+        // Собсна, создаем диалоговое окно и добавляем таски Лехиным методом))
         button_add_task.setOnClickListener {
             val addNewTask = EditText(this)
 
@@ -88,12 +94,15 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // меняем дату тасков
     private fun changeDate(newDate: Calendar) {
         date = newDate
         text_view_date.text = format.format(date.time)
         changeTasksRecyclerViewForDate(date)
     }
-    //make query by date and uid
+
+    // make query by date and uid
+    // Инициализируем FirebaseRecyclerAdapter
     private fun changeTasksRecyclerViewForDate(date: Calendar) {
         val query = db.collection("tasks").whereEqualTo("date", format.format(date.time)).whereEqualTo("uid", uid)
         val options = FirestoreRecyclerOptions.Builder<Task>()
@@ -121,6 +130,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            // меняем значение в бд на то, которое установили в чекбокс
             private fun setChangeChecked(docRef: DocumentReference, b: Boolean) {
                 docRef.update("completed", b)
             }
@@ -134,6 +144,7 @@ class MainActivity : AppCompatActivity() {
                 return TaskHolder(view)
             }
 
+            // выводим подсказку, если нету тасков
             override fun onDataChanged() {
                 Log.i("MainActivity", "onDataChanged")
                 if(this.itemCount == 0){
@@ -146,6 +157,7 @@ class MainActivity : AppCompatActivity() {
                 Log.w("MainActivity", e)
             }
 
+            // удаляем таску
             private fun removeTask(docRef: DocumentReference) {
                 AlertDialog.Builder(this@MainActivity)
                         .setTitle("Удаление задачи")
@@ -157,6 +169,7 @@ class MainActivity : AppCompatActivity() {
                         .create().show()
             }
 
+            // редактируем таску
             private fun editTask(docRef: DocumentReference, name: String) {
                 val editTaskAction = EditText(this@MainActivity)
                 editTaskAction.setText(name)
@@ -177,6 +190,7 @@ class MainActivity : AppCompatActivity() {
         recycler_view_tasks.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
     }
 
+    // добавляем таску в Firebase
     private fun addNewTaskToDate(task: String, date: String) {
         //добавляем в Firebase таску. ID документа - имя таски
         db.collection("tasks").document()
