@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity() {
 
         //переключение даты календариком
         text_view_date.setOnClickListener {
-            calendarView.visibility = View.INVISIBLE
             Toast.makeText(this, "I was tapped", Toast.LENGTH_LONG).show()
         }
     }
