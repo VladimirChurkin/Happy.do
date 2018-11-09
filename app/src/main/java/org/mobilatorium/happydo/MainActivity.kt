@@ -1,13 +1,14 @@
 package org.mobilatorium.happydo
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import android.widget.CalendarView
 import android.widget.EditText
 import android.widget.Toast
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
@@ -19,6 +20,9 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
+import android.widget.CalendarView.OnDateChangeListener
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -70,9 +74,28 @@ class MainActivity : AppCompatActivity() {
 
         //переключение даты календариком
         text_view_date.setOnClickListener {
-            Toast.makeText(this, "I was tapped", Toast.LENGTH_LONG).show()
+            setDateFromCalendar()
         }
     }
+
+    // меняем дату на ту, которую выбрали в календаре
+    private fun setDateFromCalendar() {
+        val calendar = CalendarView(this)
+        var builder = AlertDialog.Builder(this@MainActivity)
+                .setTitle("Календарь")
+                .setView(calendar)
+                .setCancelable(true)
+        val dialog = builder.create()
+        dialog.show()
+
+        calendar.date = date.timeInMillis
+        calendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            val newDate = Calendar.getInstance()
+            newDate.set(year, month, dayOfMonth)
+            changeDate(newDate)
+            dialog.dismiss()
+        }
+}
 
     private fun setupAddNewTaskButton() {
 
