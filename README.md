@@ -3,11 +3,12 @@ Happy.do - это приложение - список задач для моби
 Храните свои дела и задачи в своём смартфоне, выполняйте их и будьте Happy.do!
 
 # Экраны приложения
-<img src = "Screens/start.jpg" heigh = "500" width="275">
+<img src = "Screens/start.jpg" heigh = "500" width="275" align="left">
 <img src = "Screens/login.jpg" heigh = "500" width="275">
 <img src = "Screens/task.jpg" heigh = "500" width="275">
 <img src = "Screens/add.jpg" heigh = "500" width="275">
 <img src = "Screens/calendar.jpg" heigh = "500" width="275">
+
 # Технологии
 * Firebase Cloud Firestore
 * Firebase RecyclerView
